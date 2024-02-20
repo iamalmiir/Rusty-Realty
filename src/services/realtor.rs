@@ -1,46 +1,7 @@
 use actix_web::{get, post, web, HttpResponse, Responder};
-use sea_orm::{ActiveModelTrait, DatabaseConnection, DbErr, EntityTrait, Set};
+use sea_orm::DatabaseConnection;
 
-use crate::database::realtor;
-
-async fn fetch_realtor(database: &DatabaseConnection) -> Result<Vec<realtor::Model>, DbErr> {
-    match realtor::Entity::find().all(database).await {
-        Ok(realtors) => Ok(realtors),
-
-        Err(err) => Err(err),
-    }
-}
-
-#[derive(Debug, serde::Deserialize)]
-struct Realtor {
-    full_name: String,
-    email: String,
-    photo: Option<String>,
-    phone: String,
-    is_mvp: Option<bool>,
-    description: Option<String>,
-}
-
-async fn add_realtor(
-    database: &DatabaseConnection,
-    realtor: Realtor,
-) -> Result<realtor::Model, DbErr> {
-    let new_realtor = realtor::ActiveModel {
-        id: Set(nanoid::nanoid!()),
-        full_name: Set(realtor.full_name),
-        email: Set(realtor.email),
-        photo: Set(realtor.photo),
-        phone: Set(realtor.phone),
-        is_mvp: Set(realtor.is_mvp),
-        description: Set(realtor.description),
-        ..Default::default()
-    };
-
-    match new_realtor.insert(database).await {
-        Ok(realtor) => Ok(realtor),
-        Err(err) => Err(err),
-    }
-}
+use crate::actors::realtor::Realtor;
 
 /// Fetches all realtors from the database.
 ///
@@ -52,8 +13,8 @@ async fn add_realtor(
 ///
 /// Returns a `Result` containing a vector of `realtor::Model` if successful, or a `DbErr` if an error occurs.
 #[get("/realtors/all")]
-pub async fn get_realtor(db: web::Data<DatabaseConnection>) -> impl Responder {
-    match fetch_realtor(db.as_ref()).await {
+pub async fn get_realtors(db: web::Data<DatabaseConnection>) -> impl Responder {
+    match Realtor::fetch_all(db.as_ref()).await {
         Ok(realtors) => HttpResponse::Ok().json(realtors),
         Err(_) => HttpResponse::InternalServerError().finish(),
     }
@@ -80,7 +41,7 @@ pub async fn create_realtor(
     db: web::Data<DatabaseConnection>,
     form: web::Json<Realtor>,
 ) -> impl Responder {
-    match add_realtor(db.as_ref(), form.into_inner()).await {
+    match Realtor::add_realtor(db.as_ref(), form.into_inner()).await {
         Ok(realtor) => HttpResponse::Ok().json(realtor),
         Err(_) => HttpResponse::InternalServerError().finish(),
     }

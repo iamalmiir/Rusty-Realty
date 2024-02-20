@@ -1,10 +1,12 @@
 use actix_web::{web, App, HttpServer};
+
+mod actors;
 mod database;
 mod services;
 
 use dotenv::dotenv;
 use sea_orm::Database;
-use services::realtor::{create_realtor, get_realtor};
+use services::realtor::{create_realtor, get_realtors};
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -16,7 +18,7 @@ async fn main() -> std::io::Result<()> {
     HttpServer::new(move || {
         App::new()
             .app_data(web::Data::new(db.clone()))
-            .service(get_realtor)
+            .service(get_realtors)
             .service(create_realtor)
     })
     .bind(("127.0.0.1", 8080))?

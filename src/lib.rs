@@ -1,3 +1,3 @@
-// pub mod actors;
+mod actors;
 mod database;
 mod services;
