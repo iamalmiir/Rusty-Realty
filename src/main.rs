@@ -5,8 +5,15 @@ mod database;
 mod services;
 
 use dotenv::dotenv;
+use google_cloud_storage::client::{Client, ClientConfig};
 use sea_orm::Database;
 use services::realtor::{create_realtor, get_realtors};
+
+async fn connect_gcs() -> Result<Client, Box<dyn std::error::Error>> {
+    let config = ClientConfig::default().with_auth().await?;
+    let client = Client::new(config);
+    Ok(client)
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {

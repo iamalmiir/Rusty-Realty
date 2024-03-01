@@ -9,8 +9,10 @@ path = "src/lib.rs"
 
 
 [dependencies]
+actix-multipart = "0.6.1"
 actix-web = "4.5.1"
 dotenv = "0.15.0"
+google-cloud-storage = "0.16.0"
 log = "0.4.20"
 nanoid = "0.4.0"
 sea-orm = { version = "0.12.14", features = ["sqlx-postgres", "runtime-tokio-rustls", "macros"] }

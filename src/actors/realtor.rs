@@ -33,7 +33,7 @@ impl Realtor {
             Err(err) => Err(err),
         }
     }
-
+    /// TODO: Add pagination
     pub async fn fetch_all(db: &DatabaseConnection) -> Result<Vec<realtor::Model>, DbErr> {
         match realtor::Entity::find().all(db).await {
             Ok(realtors) => Ok(realtors),
